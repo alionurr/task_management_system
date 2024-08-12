@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserToken extends Model
 {
     protected $fillable = [
-        'user_id', 'token', 'expires_at', 'is_revoked'
+        'user_id', 'token', 'expires_at'
     ];
 
     // Token'ın ait olduğu kullanıcı
