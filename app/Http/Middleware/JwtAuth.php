@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Carbon\Carbon;
 use App\Models\UserToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,11 @@ class JwtAuth
             $storedToken = UserToken::where('user_id', $user->id)->where('token', $token)->first();
             if (!$storedToken) {
                 return response()->json(['error' => 'Token is invalid'], 401);
+            }
+            
+            // token süresini kontrol et
+            if (Carbon::now()->greaterThan($storedToken->expires_at)) {
+                return response()->json(['error' => 'Token has expired'], 401);
             }
 
             Auth::setUser($user);

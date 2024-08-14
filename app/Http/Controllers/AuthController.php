@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\UserToken;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -21,14 +22,21 @@ class AuthController extends Controller
 
             // Kullanıcıyı al
             $user = JWTAuth::setToken($token)->toUser();
+            $expiresAt = Carbon::now()->addMinutes((int)config('jwt.ttl', 60))->toDateTimeString();
 
             // Token'ı user_token tablosuna ekle
             UserToken::updateOrCreate(
                 ['user_id' => $user->id],
-                ['token' => $token]
+                [
+                    'token' => $token,
+                    'expires_at' => $expiresAt
+                ]
             );
 
-            return response()->json(['token' => $token]);
+            return response()->json([
+                'token' => $token,
+                'expires_at' => $expiresAt
+            ]);
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
