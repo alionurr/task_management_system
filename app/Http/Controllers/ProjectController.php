@@ -87,9 +87,11 @@ class ProjectController extends Controller
 
         $project->update($request->all());
 
-        $userIds = $request->input('user_ids'); // Request'ten user_id alınıyor
-        $project->users()->sync($userIds);
-
+        if (!empty($request->input('user_ids'))) {
+            // Request'ten user_id alınıyor
+            $userIds = $request->input('user_ids');
+            $project->users()->sync($userIds);
+        }
         return response()->json($project);
     }
 

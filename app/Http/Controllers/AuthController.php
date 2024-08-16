@@ -42,17 +42,24 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $token = $request->header('Authorization');
-        $user = JWTAuth::setToken($token)->toUser();
+        try {
+            // Kullanıcının mevcut JWT token'ını al ve geçersiz kıl
+            JWTAuth::invalidate(JWTAuth::parseToken());
 
-        if ($user) {
-            UserToken::where('user_id', $user->id)->where('token', $token)->delete();
-            return response()->json(['message' => 'Successfully logged out']);
+            return response()->json([
+                'success' => true,
+                'message' => 'User successfully logged out.'
+            ]);
+        } catch (JWTException $e) {
+            // Token geçersiz kılınamıyorsa hata döndür
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to logout, please try again.'
+            ], 500);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
     }
 
 }

@@ -4,11 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Carbon\Carbon;
-use App\Models\UserToken;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Facades\JWTAuth as JA;
 
 class JwtAuth
 {
@@ -19,30 +17,25 @@ class JwtAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->header('Authorization');
-
-        if (!$token) {
-            return response()->json(['error' => 'Token not provided'], 401);
-        }
-
         try {
-            // Token'ı doğrula ve kullanıcıyı al
-            $user = JWTAuth::setToken($token)->toUser();
-            
-            // Token'ı user_token tablosunda kontrol et
-            $storedToken = UserToken::where('user_id', $user->id)->where('token', $token)->first();
-            if (!$storedToken) {
-                return response()->json(['error' => 'Token is invalid'], 401);
-            }
-            
-            // token süresini kontrol et
-            if (Carbon::now()->greaterThan($storedToken->expires_at)) {
-                return response()->json(['error' => 'Token has expired'], 401);
-            }
+            // Token'ı doğrula
+            $user = JA::parseToken()->authenticate();
 
-            Auth::setUser($user);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Token is invalid'], 401);
+            // user ve token süre kontrolü
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+            if (Carbon::now()->greaterThan($user->token->expires_at)) {
+                return response()->json(['error' => 'Token has expired'], 404);
+            }
+        } catch (\Exception $e) {
+            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
+                return response()->json(['error' => 'Token is Invalid'], 401);
+            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException){
+                return response()->json(['error' => 'Token is Expired'], 401);
+            } else {
+                return response()->json(['error' => 'Authorization Token not found'], 401);
+            }
         }
 
         return $next($request);
