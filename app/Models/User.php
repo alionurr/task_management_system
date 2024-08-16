@@ -44,18 +44,18 @@ class User extends Authenticatable implements JWTSubject
     // Kullanıcının sahip olduğu projeler
     public function projects()
     {
-        return $this->hasMany(Project::class);
+        return $this->belongsToMany(Project::class, 'project_user');
     }
 
-    // Kullanıcının sahip olduğu tokenlar
-    public function tokens()
+    // Kullanıcının sahip olduğu token
+    public function token()
     {
-        return $this->hasMany(UserToken::class);
+        return $this->hasOne(UserToken::class);
     }
 
     // Kullanıcının görevleri (eğer görev atamaları mevcutsa)
     public function tasks()
     {
-        return $this->hasMany(Task::class);
+        return $this->belongsToMany(Task::class, 'task_user');
     }
 }
