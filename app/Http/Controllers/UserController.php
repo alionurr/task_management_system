@@ -56,10 +56,6 @@ class UserController extends Controller
     {
         $user = User::with('projects.tasks')->findOrFail($userId);
 
-        $tasks = $user->projects->flatMap(function ($project) {
-            return $project->tasks;
-        });
-
-        return response()->json($tasks);
+        return response()->json($user->tasks);
     }
 }

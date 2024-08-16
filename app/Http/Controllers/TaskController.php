@@ -24,10 +24,12 @@ class TaskController extends Controller
             return response()->json(['error' => 'Project not found'], 404);
         }
 
+        $cacheKey = "project_tasks_{$projectId}";
         // Projeye ait tüm task'ları al
-        $tasks = Cache::remember('tasks', 3600, function ($project) {
+        $tasks = Cache::remember($cacheKey, 3600, function() use ($project) {
             return $project->tasks;
         });
+
         return response()->json($tasks);
     }
 
