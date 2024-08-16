@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
@@ -15,7 +16,10 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        $projects = Project::all();
+        $projects = Cache::remember('projects', 3600, function () {
+            return Project::all();
+        });
+        
         return response()->json($projects);
     }
 

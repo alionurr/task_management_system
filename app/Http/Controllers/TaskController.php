@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
@@ -24,7 +25,9 @@ class TaskController extends Controller
         }
 
         // Projeye ait tüm task'ları al
-        $tasks = $project->tasks;
+        $tasks = Cache::remember('tasks', 3600, function ($project) {
+            return $project->tasks;
+        });
         return response()->json($tasks);
     }
 

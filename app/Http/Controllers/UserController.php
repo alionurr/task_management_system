@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\UserRegister;
 use App\Models\User;
+use App\Mail\UserRegister;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = Cache::remember('users', 3600, function () {
+            return User::all();
+        });
         return response()->json($users);
     }
 
