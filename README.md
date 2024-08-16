@@ -52,3 +52,9 @@ cp .env.example .env
 ```bash
 ./vendor/bin/sail queue:work redis
 ```
+
+## 9. Postman
+
+Repoda bulunan ``task_management_system_api_requests.postman_collection.json`` dosyası ile postman üzerinden test edebilirsiniz.
+
+
